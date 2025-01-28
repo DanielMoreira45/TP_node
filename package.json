@@ -1,0 +1,24 @@
+{
+  "name": "realtime-elo-ranker",
+  "version": "1.0.0",
+  "description": "",
+  "keywords": [],
+  "author": "",
+  "license": "UNLICENSED",
+  "scripts": {
+    "apps:client:dev": "pnpm run --filter ./apps/realtime-elo-ranker-client dev",
+    "apps:server:dev": "pnpm run --filter ./apps/realtime-elo-ranker-server dev",
+    "apps:api-mock:start": "pnpm run --filter ./apps/realtime-elo-ranker-api-mock start",
+    "libs:ui:build": "pnpm run --filter ./libs/ui build",
+    "libs:ui:test": "pnpm run --filter ./libs/ui test",
+    "docs:swagger:start": "pnpm run --filter ./docs/swagger start"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "^11.0.1",
+    "generate-react-cli": "^8.4.9",
+    "motion": "^11.17.0",
+    "next": "15.1.4",
+    "typescript": "^5"
+  },
+  "packageManager": "pnpm@8.15.9+sha512.499434c9d8fdd1a2794ebf4552b3b25c0a633abcee5bb15e7b5de90f32f47b513aca98cd5cfd001c31f0db454bc3804edccd578501e4ca293a6816166bbd9f81"
+}
