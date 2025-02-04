@@ -9,11 +9,11 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
   imports: [
     TypeOrmModule.forRoot({
       type: 'sqlite',
-      database: 'db.sqlite', // Nom du fichier de base de données SQLite
-      entities: [Player], // Spécifier les entités à utiliser
-      synchronize: true, // Crée les tables automatiquement, utile pour le développement
+      database: 'db.sqlite',
+      entities: [Player],
+      synchronize: true,
     }),
-    TypeOrmModule.forFeature([Player]), // Permet d'utiliser l'entité Player dans le service
+    TypeOrmModule.forFeature([Player]),
     EventEmitterModule.forRoot()
   ],
   controllers: [AppController],

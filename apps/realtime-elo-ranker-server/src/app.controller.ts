@@ -1,12 +1,13 @@
 import { Controller, Get, Post, Body, Sse } from '@nestjs/common';
-import { Observable, interval, from } from 'rxjs';
-import { switchMap, map } from 'rxjs/operators';
+import { Observable, interval, from, fromEvent } from 'rxjs';
+import { switchMap, map, mergeMap } from 'rxjs/operators';
 import { AppService } from './app.service';
 import { Player } from '../class/player.entity';
+import { EventEmitter2 } from '@nestjs/event-emitter';
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(private readonly appService: AppService, private eventEmitter: EventEmitter2) {}
 
   @Post('/api/player')
   async createPlayer(@Body('id') id: string): Promise<Player> {
@@ -23,19 +24,11 @@ export class AppController {
     return this.appService.playMatch(winnerId, looserId, matchNull);
   }
 
-  // SSE pour envoyer les mises à jour du classement
+  
   @Sse('api/ranking/events')
   sendRankingUpdates(): Observable<MessageEvent> {
-    return interval(1000).pipe(
-      switchMap(() => {
-        return from(this.getRank()).pipe(
-          map(players => {
-            return {
-              data: JSON.stringify(players),
-            } as MessageEvent;
-          }),
-        );
-      }),
+    return this.appService.getRankingObservable().pipe(
+      map(data => new MessageEvent('ranking.update', { data: JSON.stringify(data) }))
     );
   }
 }
