@@ -5,7 +5,7 @@
   "keywords": [],
   "author": "",
   "scripts": {
-    "start": "LIVERELOAD_PORT=35729 nodemon --watch swagger.yaml index.mjs"
+    "start": "nodemon --watch swagger.yaml index.mjs"
   },
   "license": "ISC",
   "dependencies": {

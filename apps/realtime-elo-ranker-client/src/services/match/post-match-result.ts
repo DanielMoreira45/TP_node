@@ -14,8 +14,8 @@ export default function postMatchResult(baseUrl: string, adversaryA: string, adv
   return fetch(baseUrl + URL, {
     method: "POST",
     body: JSON.stringify({
-      winner: result === MatchResult.LEFT_WIN ? adversaryA : result === MatchResult.RIGHT_WIN ? adversaryB : null,
-      loser: result === MatchResult.LEFT_WIN ? adversaryB : result === MatchResult.RIGHT_WIN ? adversaryA : null,
+      winner: result === MatchResult.LEFT_WIN ? adversaryA : adversaryB,
+      loser: result === MatchResult.LEFT_WIN ? adversaryB : adversaryA,
       draw: result === MatchResult.DRAW ? true : false,
     }),
     headers: {
