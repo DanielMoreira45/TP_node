@@ -1,6 +1,6 @@
-import { Controller, Get, Post, Body, Sse, Logger } from '@nestjs/common';
-import { Observable, interval, from, fromEvent } from 'rxjs';
-import { switchMap, map, mergeMap } from 'rxjs/operators';
+import { Controller, Get, Post, Body, Sse } from '@nestjs/common';
+import { Observable, fromEvent } from 'rxjs';
+import { map } from 'rxjs/operators';
 import { AppService } from './app.service';
 import { Player } from '../class/player.entity';
 import { EventEmitter2 } from '@nestjs/event-emitter';
