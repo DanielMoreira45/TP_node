@@ -14,7 +14,7 @@ import { EventEmitterModule } from '@nestjs/event-emitter';
       synchronize: true,
     }),
     TypeOrmModule.forFeature([Player]),
-    EventEmitterModule.forRoot()
+    EventEmitterModule.forRoot(),
   ],
   controllers: [AppController],
   providers: [AppService],

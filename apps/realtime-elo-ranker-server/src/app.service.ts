@@ -9,19 +9,29 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 export class AppService {
   private updateRank = new BehaviorSubject<Player[]>([]);
 
-  constructor(private eventEmitter: EventEmitter2,@InjectRepository(Player) private playerRepository: Repository<Player>) {}
+  constructor(
+    private eventEmitter: EventEmitter2,
+    @InjectRepository(Player) private playerRepository: Repository<Player>,
+  ) {}
 
   async createPlayer(id: string): Promise<Player> {
     const newPlayer = this.playerRepository.create({ id, rank: 0 });
     await this.playerRepository.save(newPlayer);
-    this.updateRanking();
+    await this.updateRanking(newPlayer);
     return newPlayer;
   }
 
-
-  async playMatch(winnerId: string, looserId: string, matchNull: boolean): Promise<string> {
-    const player1 = await this.playerRepository.findOne({ where: { id: winnerId } });
-    const player2 = await this.playerRepository.findOne({ where: { id: looserId } });
+  async playMatch(
+    winnerId: string,
+    looserId: string,
+    matchNull: boolean,
+  ): Promise<string> {
+    const player1 = await this.playerRepository.findOne({
+      where: { id: winnerId },
+    });
+    const player2 = await this.playerRepository.findOne({
+      where: { id: looserId },
+    });
 
     if (!player1 || !player2) {
       return 'Un ou plusieurs joueurs non trouvés!';
@@ -35,14 +45,15 @@ export class AppService {
     if (matchNull) {
       message = `Match nul entre ${player1.id} et ${player2.id}`;
     } else {
-      player1.rank += 10;
-      player2.rank -= 5;
+      player1.calculerClassementElo(player2, 1);
+      player2.calculerClassementElo(player1, 0);
       message = `${player1.id} gagne contre ${player2.id}`;
     }
 
     await this.playerRepository.save([player1, player2]);
 
-    await this.updateRanking();
+    await this.updateRanking(player1);
+    await this.updateRanking(player2);
 
     return message;
   }
@@ -59,21 +70,16 @@ export class AppService {
     return this.updateRank.asObservable();
   }
 
-  private lastRanks = new Map<string, number>();
-
-  async updateRanking() {
-    const players = await this.getRank();
-    const updatedPlayers = players.filter(player => {
-      if (this.lastRanks.get(player.id) !== player.rank) {
-        this.lastRanks.set(player.id, player.rank);
-        return true;
-      }
-      return false;
+  async updateRanking(player: Player) {
+    if (!player) {
+      return;
+    }
+    const updatedPlayer = await this.playerRepository.findOne({
+      where: { id: player.id },
     });
-
-    if (updatedPlayers.length > 0) {
-      this.updateRank.next(updatedPlayers);
-      this.eventEmitter.emit('ranking.updated', updatedPlayers);
+    if (updatedPlayer) {
+      this.updateRank.next([updatedPlayer]);
+      this.eventEmitter.emit('ranking.updated', updatedPlayer);
     }
   }
 }
