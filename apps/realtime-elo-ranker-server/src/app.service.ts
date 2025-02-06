@@ -1,7 +1,7 @@
 import { Injectable, Sse } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
-import { Player } from '../class/player.entity';
+import { Player } from './../class/player.entity';
 import { BehaviorSubject } from 'rxjs';
 import { EventEmitter2 } from '@nestjs/event-emitter';
 
@@ -9,17 +9,15 @@ import { EventEmitter2 } from '@nestjs/event-emitter';
 export class AppService {
   private updateRank = new BehaviorSubject<Player[]>([]);
 
-  constructor(
-    @InjectRepository(Player) private playerRepository: Repository<Player>,
-    private eventEmitter: EventEmitter2
-  ) {}
+  constructor(private eventEmitter: EventEmitter2,@InjectRepository(Player) private playerRepository: Repository<Player>) {}
 
   async createPlayer(id: string): Promise<Player> {
     const newPlayer = this.playerRepository.create({ id, rank: 0 });
     await this.playerRepository.save(newPlayer);
-    await this.updateRanking();
+    this.updateRanking();
     return newPlayer;
   }
+
 
   async playMatch(winnerId: string, looserId: string, matchNull: boolean): Promise<string> {
     const player1 = await this.playerRepository.findOne({ where: { id: winnerId } });
@@ -37,8 +35,8 @@ export class AppService {
     if (matchNull) {
       message = `Match nul entre ${player1.id} et ${player2.id}`;
     } else {
-      player1.rank += 10;  // Gagner donne des points
-      player2.rank -= 5;   // Perdre enlève des points
+      player1.rank += 10;
+      player2.rank -= 5;
       message = `${player1.id} gagne contre ${player2.id}`;
     }
 
@@ -57,14 +55,25 @@ export class AppService {
     });
   }
 
-  getRankingObservable(){
+  getRankingObservable() {
     return this.updateRank.asObservable();
   }
 
-  async updateRanking(){
-    const players = await this.getRank();
-    this.updateRank.next(players);
-    this.eventEmitter.emit('ranking.updated', players);
-  }
+  private lastRanks = new Map<string, number>();
 
+  async updateRanking() {
+    const players = await this.getRank();
+    const updatedPlayers = players.filter(player => {
+      if (this.lastRanks.get(player.id) !== player.rank) {
+        this.lastRanks.set(player.id, player.rank);
+        return true;
+      }
+      return false;
+    });
+
+    if (updatedPlayers.length > 0) {
+      this.updateRank.next(updatedPlayers);
+      this.eventEmitter.emit('ranking.updated', updatedPlayers);
+    }
+  }
 }

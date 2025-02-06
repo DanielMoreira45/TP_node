@@ -1,8 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, Column, PrimaryColumn } from 'typeorm';
 
 @Entity()
 export class Player {
-  @PrimaryGeneratedColumn('uuid')
+  @PrimaryColumn('text')
   id: string;
 
   @Column('int')
@@ -13,8 +13,8 @@ export class Player {
     this.rank = rank;
   }
 
-  // Méthode pour mettre à jour le score du joueur
   updateRank(newRank: number) {
     this.rank += newRank;
   }
 }
+
